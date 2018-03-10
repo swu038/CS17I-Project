@@ -1,6 +1,7 @@
 // Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
 #include "ShooterGame.h"
+#include "ShooterCharacter.h"
 #include "Player/ShooterCharacterMovement.h"
 
 //----------------------------------------------------------------------//
@@ -30,4 +31,18 @@ float UShooterCharacterMovement::GetMaxSpeed() const
 	}
 
 	return MaxSpeed;
+}
+
+void UShooterCharacterMovement::PerformMovement(float DeltaSeconds) {
+	if (!PawnOwner) {
+		return;
+	}
+
+	Super::PerformMovement(DeltaSeconds);
+
+	AShooterCharacter* ShooterCharacter = Cast<AShooterCharacter>(PawnOwner);
+	if (ShooterCharacter) {
+		ShooterCharacter->PositionUpdated();
+	}
+
 }

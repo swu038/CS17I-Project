@@ -1,5 +1,7 @@
 // Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
+#define COLLISION_HITBOX ECC_GameTraceChannel4
+
 #include "ShooterGame.h"
 #include "Weapons/ShooterWeapon.h"
 #include "Weapons/ShooterDamageType.h"
@@ -55,6 +57,8 @@ AShooterCharacter::AShooterCharacter(const FObjectInitializer& ObjectInitializer
 	GetCapsuleComponent()->SetCollisionResponseToChannel(COLLISION_PROJECTILE, ECR_Block);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(COLLISION_WEAPON, ECR_Ignore);
 
+	GenerateHitboxes();
+
 	TargetingSpeedModifier = 0.5f;
 	bIsTargeting = false;
 	RunningSpeedModifier = 1.5f;
@@ -64,7 +68,231 @@ AShooterCharacter::AShooterCharacter(const FObjectInitializer& ObjectInitializer
 
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
+
+
+	ShooterCharacterMovement = Cast<UShooterCharacterMovement>(GetCharacterMovement());
+
 }
+
+// Begin lag compensation code
+void AShooterCharacter::GenerateHitboxes() {
+	USkeletalMeshComponent* PlayerMesh = GetMesh();
+
+	// HB_Head
+	HB_Head = CreateDefaultSubobject<UBoxComponent>(TEXT("HB_Head"));
+	HB_Head->SetupAttachment(PlayerMesh, FName(TEXT("b_head")));
+	HB_Head->SetRelativeLocation(FVector(1.287602f, 0.721266f, -0.49535f));
+	HB_Head->SetRelativeRotation(FRotator(0.f, -87.780823f, 0.f));
+	HB_Head->SetWorldScale3D(FVector(0.414147f, 0.469481f, 0.349886f));
+
+	// COLLISION_HITBOX is a custom collision channel
+	HB_Head->SetCollisionObjectType(COLLISION_HITBOX);
+	HB_Head->SetCollisionProfileName("Hitbox");
+	HB_Head->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	HB_Head->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+
+	// HB_UpperTorso
+	HB_UpperTorso = CreateDefaultSubobject<UBoxComponent>(TEXT("HB_UpperTorso"));
+	HB_UpperTorso->SetupAttachment(PlayerMesh, FName(TEXT("b_Spine1")));
+	HB_UpperTorso->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
+	HB_UpperTorso->SetRelativeRotation(FRotator(0.f, 0.0f, 0.f));
+	HB_UpperTorso->SetWorldScale3D(FVector(1.0f, 1.0f, 1.0f));
+
+	// COLLISION_HITBOX is a custom collision channel
+	HB_UpperTorso->SetCollisionObjectType(COLLISION_HITBOX);
+	HB_UpperTorso->SetCollisionProfileName("Hitbox");
+	HB_UpperTorso->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	HB_UpperTorso->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+
+	// HB_LowerTorso
+	HB_LowerTorso = CreateDefaultSubobject<UBoxComponent>(TEXT("HB_LowerTorso"));
+	HB_LowerTorso->SetupAttachment(PlayerMesh, FName(TEXT("b_Hips")));
+	HB_LowerTorso->SetRelativeLocation(FVector(10.0f, 0.0f, 0.0f));
+	HB_LowerTorso->SetRelativeRotation(FRotator(0.f, 0.0f, 0.f));
+	HB_LowerTorso->SetWorldScale3D(FVector(5.0f, 0.5f, 0.5f));
+
+	// COLLISION_HITBOX is a custom collision channel
+	HB_LowerTorso->SetCollisionObjectType(COLLISION_HITBOX);
+	HB_LowerTorso->SetCollisionProfileName("Hitbox");
+	HB_LowerTorso->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	HB_LowerTorso->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+
+	// HB_LowerLeftLeg
+	HB_LowerLeftLeg = CreateDefaultSubobject<UBoxComponent>(TEXT("HB_LowerLeftLeg"));
+	HB_LowerLeftLeg->SetupAttachment(PlayerMesh, FName(TEXT("b_LeftFoot")));
+	HB_LowerLeftLeg->SetRelativeLocation(FVector(0.0f, -50.0f, -50.0f));
+	HB_LowerLeftLeg->SetRelativeRotation(FRotator(0.f, 0.0f, 0.f));
+	HB_LowerLeftLeg->SetWorldScale3D(FVector(1.0f, 1.0f, 1.0f));
+
+	// COLLISION_HITBOX is a custom collision channel
+	HB_LowerLeftLeg->SetCollisionObjectType(COLLISION_HITBOX);
+	HB_LowerLeftLeg->SetCollisionProfileName("Hitbox");
+	HB_LowerLeftLeg->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	HB_LowerLeftLeg->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+
+	// HB_UpperLeftLeg
+
+	// HB_LeftFoot
+
+	// HB_RightFoot
+
+	// HB_LowerRightLeg
+
+	// HB_UpperRightLeg
+
+	// HB_LeftHand
+
+	// HB_LowerLeftArm
+
+	// HB_UpperLeftArm
+
+	// HB_RightHand
+
+	// HB_LowerRightArm
+
+	// HB_UpperRightArm
+}
+
+void AShooterCharacter::PositionUpdated() {
+
+	const FVector LocationToSave = GetActorLocation();
+	const FRotator RotationToSave = GetViewRotation();
+	const float WorldTime = GetWorld()->GetTimeSeconds();
+	const TArray<FSavedHitbox> HitboxesToSave = BuildSavedHitboxArr();
+
+	const FSavedPosition PositionToSave = FSavedPosition(
+		LocationToSave,
+		RotationToSave,
+		WorldTime,
+		HitboxesToSave
+	);
+
+	SavedPositions.Add(PositionToSave);
+
+	// Clean up SavedPositions that have exceeded out Age limit.
+	// However, we should keep a handle to at least one FSavedPosition that exceeds the max age
+	// for interpolation.
+	if (SavedPositions.Num() >= 2 && SavedPositions[1].Time < WorldTime - MaxSavedPositionAge) {
+		SavedPositions.RemoveAt(0);
+	}
+
+}
+
+TArray<FSavedHitbox> AShooterCharacter::BuildSavedHitboxArr() {
+
+	TArray<FSavedHitbox> SavedHitboxArr;
+
+	if (HB_Head) {
+		FSavedHitbox SH_Head;
+		SH_Head.HitboxType = EHitboxType::Head;
+		SH_Head.Position = HB_Head->GetComponentLocation();
+		SH_Head.Rotation = HB_Head->GetComponentRotation();
+		SavedHitboxArr.Add(SH_Head);
+	}
+
+	if (HB_UpperTorso) {
+		FSavedHitbox SH_UpperTorso;
+		SH_UpperTorso.HitboxType = EHitboxType::UpperTorso;
+		SH_UpperTorso.Position = HB_UpperTorso->GetComponentLocation();
+		SH_UpperTorso.Rotation = HB_UpperTorso->GetComponentRotation();
+		SavedHitboxArr.Add(SH_UpperTorso);
+	}
+	
+	if (HB_LowerTorso) {
+		FSavedHitbox SH_LowerTorso;
+		SH_LowerTorso.HitboxType = EHitboxType::LowerTorso;
+		SH_LowerTorso.Position = HB_LowerTorso->GetComponentLocation();
+		SH_LowerTorso.Rotation = HB_LowerTorso->GetComponentRotation();
+		SavedHitboxArr.Add(SH_LowerTorso);
+	}
+
+	if (HB_LowerLeftLeg) {
+		FSavedHitbox SH_LowerLeftLeg;
+		SH_LowerLeftLeg.HitboxType = EHitboxType::LowerLeftLeg;
+		SH_LowerLeftLeg.Position = HB_LowerLeftLeg->GetComponentLocation();
+		SH_LowerLeftLeg.Rotation = HB_LowerLeftLeg->GetComponentRotation();
+		SavedHitboxArr.Add(SH_LowerLeftLeg);
+	}
+
+	// ...
+	// Repeat for all player hitboxes
+	// ...
+
+	return SavedHitboxArr;
+
+}
+
+UBoxComponent* AShooterCharacter::GetHitbox(EHitboxType HitboxType) {
+
+	UBoxComponent* Hitbox = nullptr;
+
+	switch (HitboxType) {
+
+	case EHitboxType::Head:
+		Hitbox = HB_Head;
+		break;
+
+	case EHitboxType::UpperTorso:
+		Hitbox = HB_UpperTorso;
+		break;
+
+	case EHitboxType::LowerTorso:
+		Hitbox = HB_LowerTorso;
+		break;
+
+	case EHitboxType::LowerLeftLeg:
+		Hitbox = HB_LowerLeftLeg;
+		break;
+		// ...
+
+	default:
+		break;
+	}
+
+	return Hitbox;
+
+}
+
+
+FVector AShooterCharacter::GetHitboxExtent(EHitboxType HitboxType) {
+
+	UBoxComponent* Hitbox = GetHitbox(HitboxType);
+
+	if (Hitbox) {
+		return Hitbox->GetScaledBoxExtent();
+	}
+
+	return FVector(0.f);
+
+}
+
+void AShooterCharacter::DrawSavedPositions(const TArray<FSavedPosition> SavedPositions) {
+
+	const FColor BoxColor = FColor::Green;
+	const float BoxLifetime = 0.1f;
+	const uint8 DepthPriority = 0;
+	const float BoxThickness = 0.75f;
+	const bool PersistentLines = true;
+
+	for (FSavedPosition SavedPosition : SavedPositions) {
+		for (FSavedHitbox SavedHitbox : SavedPosition.Hitboxes) {
+			DrawDebugBox(
+				GetWorld(),
+				SavedHitbox.Position,
+				GetHitboxExtent(SavedHitbox.HitboxType),
+				SavedHitbox.Rotation.Quaternion(),
+				BoxColor,
+				PersistentLines,
+				BoxLifetime,
+				DepthPriority,
+				PersistentLines
+			);
+		}
+	}
+
+}
+
+// End lag compensation code
 
 void AShooterCharacter::PostInitializeComponents()
 {
@@ -247,7 +475,6 @@ void AShooterCharacter::KilledBy(APawn* EventInstigator)
 		Die(Health, FDamageEvent(UDamageType::StaticClass()), Killer, NULL);
 	}
 }
-
 
 float AShooterCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser)
 {
@@ -1100,6 +1327,10 @@ void AShooterCharacter::Tick(float DeltaSeconds)
 		{
 			DrawDebugSphere(GetWorld(), PointToTest, 10.0f, 8, FColor::Red);
 		}
+	}
+
+	if (HasAuthority()) {
+		DrawSavedPositions(SavedPositions);
 	}
 }
 

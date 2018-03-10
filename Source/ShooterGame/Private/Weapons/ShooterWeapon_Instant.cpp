@@ -4,17 +4,7 @@
 #include "Weapons/ShooterWeapon_Instant.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Effects/ShooterImpactEffect.h"
-#include "UI/ShooterHUD.h"
-#include "SShooterScoreboardWidget.h"
-#include "SChatWidget.h"
-#include "Engine/ViewportSplitScreen.h"
-#include "ShooterWeapon.h"
-#include "ShooterDamageType.h"
-#include "Online/ShooterPlayerState.h"
-#include "Misc/NetworkVersion.h"
-#include "GameFramework/Actor.h"
-#include "GameFramework/PlayerController.h"
-#include "Runtime/Engine/Classes/GameFramework/HUD.h"
+
 AShooterWeapon_Instant::AShooterWeapon_Instant(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	CurrentFiringSpread = 0.0f;
@@ -43,7 +33,6 @@ void AShooterWeapon_Instant::FireWeapon()
 
 bool AShooterWeapon_Instant::ServerNotifyHit_Validate(const FHitResult& Impact, FVector_NetQuantizeNormal ShootDir, int32 RandomSeed, float ReticleSpread)
 {
-	//UE_LOG(LogTemp, Display, TEXT("Hit"));
 	return true;
 }
 
@@ -63,73 +52,47 @@ void AShooterWeapon_Instant::ServerNotifyHit_Implementation(const FHitResult& Im
 		{
 			if (CurrentState != EWeaponState::Idle)
 			{
-				if (Impact.GetActor() == NULL) //Did not hit a player
+				if (Impact.GetActor() == NULL)
 				{
-					if (Impact.bBlockingHit) //But it did hit an actor object
+					if (Impact.bBlockingHit)
 					{
-						UE_LOG(LogTemp, Display, TEXT("Hit Non Player"));
 						ProcessInstantHit_Confirmed(Impact, Origin, ShootDir, RandomSeed, ReticleSpread);
 					}
 				}
-				// assume it told the truth about static things because they don't move and the hit 
+				// assume it told the truth about static things because the don't move and the hit 
 				// usually doesn't have significant gameplay implications
 				else if (Impact.GetActor()->IsRootComponentStatic() || Impact.GetActor()->IsRootComponentStationary())
 				{
-					UE_LOG(LogTemp, Display, TEXT("Hit Static Object"));
 					ProcessInstantHit_Confirmed(Impact, Origin, ShootDir, RandomSeed, ReticleSpread);
 				}
 				else
 				{
-					//// Get the component bounding box
-					//const FBox HitBox = Impact.GetActor()->GetComponentsBoundingBox();
+					// Get the component bounding box
+					const FBox HitBox = Impact.GetActor()->GetComponentsBoundingBox();
 
-					//// calculate the box extent, and increase by a leeway
-					//FVector BoxExtent = 0.5 * (HitBox.Max - HitBox.Min);
-					//BoxExtent *= InstantConfig.ClientSideHitLeeway;
+					// calculate the box extent, and increase by a leeway
+					FVector BoxExtent = 0.5 * (HitBox.Max - HitBox.Min);
+					BoxExtent *= InstantConfig.ClientSideHitLeeway;
 
-					//// avoid precision errors with really thin objects
-					//BoxExtent.X = FMath::Max(20.0f, BoxExtent.X);
-					//BoxExtent.Y = FMath::Max(20.0f, BoxExtent.Y);
-					//BoxExtent.Z = FMath::Max(20.0f, BoxExtent.Z);
+					// avoid precision errors with really thin objects
+					BoxExtent.X = FMath::Max(20.0f, BoxExtent.X);
+					BoxExtent.Y = FMath::Max(20.0f, BoxExtent.Y);
+					BoxExtent.Z = FMath::Max(20.0f, BoxExtent.Z);
 
-					//// Get the box center
-					//const FVector BoxCenter = (HitBox.Min + HitBox.Max) * 0.5;
+					// Get the box center
+					const FVector BoxCenter = (HitBox.Min + HitBox.Max) * 0.5;
 
-					//// if we are within client tolerance
-					//if (FMath::Abs(Impact.Location.Z - BoxCenter.Z) < BoxExtent.Z &&
-					//	FMath::Abs(Impact.Location.X - BoxCenter.X) < BoxExtent.X &&
-					//	FMath::Abs(Impact.Location.Y - BoxCenter.Y) < BoxExtent.Y)
-					//{
-					//	ProcessInstantHit_Confirmed(Impact, Origin, ShootDir, RandomSeed, ReticleSpread);
-					//}
-					//else
-					//{
-					//	UE_LOG(LogShooterWeapon, Log, TEXT("%s Rejected client side hit of %s (outside bounding box tolerance)"), *GetNameSafe(this), *GetNameSafe(Impact.GetActor()));
-					//}
-					AShooterPlayerController* MyPC = Cast<AShooterPlayerController>(GetWorld()->GetFirstPlayerController());
-					AShooterPlayerState* ShooterPlayer = Cast<AShooterPlayerState>(MyPC->PlayerState);
-
-					if (MyPC == NULL)
-					{
-						UE_LOG(LogTemp, Display, TEXT("Player Controller Missing also Player State"));
-					}
-					
-					//if (MyPlayerState == NULL)
-					//{
-					//	UE_LOG(LogTemp, Display, TEXT("Player Controller Missing also Player State"));
-					//}
-					FString Text = FString::FromInt(ShooterPlayer->Ping * 4);
-					GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, Text);
-					UE_LOG(LogTemp, Display, TEXT("Hit Player Object"));
-					if (ShooterPlayer->Ping > 300)
-					{
-						UE_LOG(LogShooterWeapon, Log, TEXT("%s Too laggy, Rejected client side hit of %s"), *GetNameSafe(this), *GetNameSafe(Impact.GetActor()));
-					}
-					else
+					// if we are within client tolerance
+					if (FMath::Abs(Impact.Location.Z - BoxCenter.Z) < BoxExtent.Z &&
+						FMath::Abs(Impact.Location.X - BoxCenter.X) < BoxExtent.X &&
+						FMath::Abs(Impact.Location.Y - BoxCenter.Y) < BoxExtent.Y)
 					{
 						ProcessInstantHit_Confirmed(Impact, Origin, ShootDir, RandomSeed, ReticleSpread);
 					}
-					
+					else
+					{
+						UE_LOG(LogShooterWeapon, Log, TEXT("%s Rejected client side hit of %s (outside bounding box tolerance)"), *GetNameSafe(this), *GetNameSafe(Impact.GetActor()));
+					}
 				}
 			}
 		}
@@ -146,7 +109,6 @@ void AShooterWeapon_Instant::ServerNotifyHit_Implementation(const FHitResult& Im
 
 bool AShooterWeapon_Instant::ServerNotifyMiss_Validate(FVector_NetQuantizeNormal ShootDir, int32 RandomSeed, float ReticleSpread)
 {
-	UE_LOG(LogTemp, Display, TEXT("Miss"));
 	return true;
 }
 
@@ -193,19 +155,14 @@ void AShooterWeapon_Instant::ProcessInstantHit(const FHitResult& Impact, const F
 	}
 
 	// process a confirmed hit
-	UE_LOG(LogTemp, Display, TEXT("Process Instant Hit Anyways"));
 	ProcessInstantHit_Confirmed(Impact, Origin, ShootDir, RandomSeed, ReticleSpread);
 }
 
 void AShooterWeapon_Instant::ProcessInstantHit_Confirmed(const FHitResult& Impact, const FVector& Origin, const FVector& ShootDir, int32 RandomSeed, float ReticleSpread)
 {
 	// handle damage
-	
-	UE_LOG(LogTemp, Display, TEXT("Confirmed Hit"));
-	UE_LOG(LogTemp, Display, TEXT("%s"), *GetNameSafe(Impact.GetActor()));
-	if (ShouldDealDamage(Impact.GetActor())) //If the actor is a player. Deal Damage
+	if (ShouldDealDamage(Impact.GetActor()))
 	{
-		UE_LOG(LogTemp, Display, TEXT("Deadly Hit"));
 		DealDamage(Impact, ShootDir);
 	}
 
@@ -231,7 +188,7 @@ void AShooterWeapon_Instant::ProcessInstantHit_Confirmed(const FHitResult& Impac
 bool AShooterWeapon_Instant::ShouldDealDamage(AActor* TestActor) const
 {
 	// if we're an actor on the server, or the actor's role is authoritative, we should register damage
-	if (TestActor) //If the actor is a player
+	if (TestActor)
 	{
 		if (GetNetMode() != NM_Client ||
 			TestActor->Role == ROLE_Authority ||

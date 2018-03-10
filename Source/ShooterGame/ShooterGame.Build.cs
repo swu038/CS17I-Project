@@ -6,10 +6,11 @@ public class ShooterGame : ModuleRules
 {
 	public ShooterGame(ReadOnlyTargetRules Target) : base(Target)
 	{
-        MinFilesUsingPrecompiledHeaderOverride = 1;
-        bFasterWithoutUnity = true;
+		MinFilesUsingPrecompiledHeaderOverride = 1;
+		bFasterWithoutUnity = true;
 
-        PrivateIncludePaths.AddRange(
+		
+		PrivateIncludePaths.AddRange(
 			new string[] { 
 				"ShooterGame/Classes/Player",
 				"ShooterGame/Private",

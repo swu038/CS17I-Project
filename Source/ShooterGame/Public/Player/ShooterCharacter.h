@@ -2,8 +2,102 @@
 
 #pragma once
 
+#include "Components/BoxComponent.h"
+#include "ShooterCharacterMovement.h"
 #include "ShooterTypes.h"
 #include "ShooterCharacter.generated.h"
+
+UENUM(BlueprintType)
+enum class EHitboxType : uint8 {
+
+	None            UMETA(DisplayName = "None"),
+	Head            UMETA(DisplayName = "Head"),
+	UpperTorso	    UMETA(DisplayName = "UpperTorso"),
+	LowerTorso	    UMETA(DisplayName = "LowerTorso"),
+	UpperLeftArm    UMETA(DisplayName = "UpperLeftArm"),
+	LowerLeftArm    UMETA(DisplayName = "LowerLeftArm"),
+	LeftHand        UMETA(DisplayName = "RightFoot"),
+	UpperRightArm   UMETA(DisplayName = "UpperRightArm"),
+	LowerRightArm   UMETA(DisplayName = "LowerRightArm"),
+	RightHand       UMETA(DisplayName = "RightFoot"),
+	UpperLeftLeg    UMETA(DisplayName = "UpperLeftLeg"),
+	LowerLeftLeg    UMETA(DisplayName = "LowerLeftLeg"),
+	LeftFoot        UMETA(DisplayName = "LeftFoot"),
+	UpperRightLeg   UMETA(DisplayName = "UpperRightLeg"),
+	LowerRightLeg   UMETA(DisplayName = "LowerRightLeg"),
+	RightFoot       UMETA(DisplayName = "RightFoot")
+
+};
+
+USTRUCT(BlueprintType)
+struct FSavedHitbox {
+
+	GENERATED_BODY()
+
+		// Position of hitbox at time Time.
+		UPROPERTY()
+		FVector Position;
+
+	// Rotation of hitbox at time Time.
+	UPROPERTY()
+		FRotator Rotation;
+
+	// Hitbox type. This will be used to retrieve Extent information.
+	UPROPERTY()
+		EHitboxType HitboxType;
+
+	FSavedHitbox() : Position(FVector(0.f)), Rotation(FRotator(0.f)), HitboxType(EHitboxType::None) {};
+
+	FSavedHitbox(
+		FVector InPos,
+		FRotator InRot,
+		EHitboxType InHitboxType
+	) :
+		Position(InPos),
+		Rotation(InRot),
+		HitboxType(InHitboxType) {};
+
+};
+
+USTRUCT(BlueprintType)
+struct FSavedPosition {
+
+	GENERATED_BODY()
+
+		// Position of player at time Time.
+		UPROPERTY()
+		FVector Position;
+
+	// Rotation of player at time Time.
+	UPROPERTY()
+		FRotator Rotation;
+
+	// Server world time when this position was updated
+	UPROPERTY()
+		float Time;
+
+	// Array of Saved Hitbox data for this position
+	UPROPERTY()
+		TArray<FSavedHitbox> Hitboxes;
+
+	FSavedPosition() :
+		Position(FVector(0.f)),
+		Rotation(FRotator(0.f)),
+		Time(0.f),
+		Hitboxes() {};
+
+	FSavedPosition(
+		FVector InPos,
+		FRotator InRot,
+		float InTime,
+		TArray<FSavedHitbox> InHitboxes
+	) :
+		Position(InPos),
+		Rotation(InRot),
+		Time(InTime),
+		Hitboxes(InHitboxes) {};
+
+};
 
 UCLASS(Abstract)
 class AShooterCharacter : public ACharacter
@@ -391,6 +485,63 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = Health)
 	float Health;
 
+	// Begin lag compensation code
+	UPROPERTY(EditDefaultsOnly, Category = "Hitbox")
+	UBoxComponent* HB_Head;
+	UPROPERTY(EditDefaultsOnly, Category = "Hitbox")
+	UBoxComponent* HB_UpperTorso;
+	UPROPERTY(EditDefaultsOnly, Category = "Hitbox")
+	UBoxComponent* HB_LowerTorso;
+	UPROPERTY(EditDefaultsOnly, Category = "Hitbox")
+	UBoxComponent* HB_LowerLeftLeg;
+	UPROPERTY(EditDefaultsOnly, Category = "Hitbox")
+	UBoxComponent* HB_UpperLeftLeg;
+	UPROPERTY(EditDefaultsOnly, Category = "Hitbox")
+	UBoxComponent* HB_LeftFoot;
+	UPROPERTY(EditDefaultsOnly, Category = "Hitbox")
+	UBoxComponent* HB_RightFoot;
+	UPROPERTY(EditDefaultsOnly, Category = "Hitbox")
+	UBoxComponent* HB_LowerRightLeg;
+	UPROPERTY(EditDefaultsOnly, Category = "Hitbox")
+	UBoxComponent* HB_UpperRightLeg;
+	UPROPERTY(EditDefaultsOnly, Category = "Hitbox")
+	UBoxComponent* HB_LeftHand;
+	UPROPERTY(EditDefaultsOnly, Category = "Hitbox")
+	UBoxComponent* HB_LowerLeftArm;
+	UPROPERTY(EditDefaultsOnly, Category = "Hitbox")
+	UBoxComponent* HB_UpperLeftArm;
+	UPROPERTY(EditDefaultsOnly, Category = "Hitbox")
+	UBoxComponent* HB_RightHand;
+	UPROPERTY(EditDefaultsOnly, Category = "Hitbox")
+	UBoxComponent* HB_LowerRightArm;
+	UPROPERTY(EditDefaultsOnly, Category = "Hitbox")
+	UBoxComponent* HB_UpperRightArm;
+
+	void GenerateHitboxes();
+
+	///@brief Called from within PlayerCharacterMovement.
+	/// Adds an instance of an FSavedPosition to the SavedPositions array.
+	virtual void PositionUpdated();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	class UShooterCharacterMovement* ShooterCharacterMovement;
+
+	UBoxComponent* GetHitbox(EHitboxType HitboxType);
+	FVector GetHitboxExtent(EHitboxType HitboxType);
+
+	void DrawSavedPositions(const TArray<FSavedPosition> SavedPositions);
+
+private:
+	TArray<FSavedHitbox> BuildSavedHitboxArr();
+
+	TArray<FSavedPosition> SavedPositions;
+
+	///@brief Maximum time to hold onto SavedPositions.
+	///       500ms of Lag Compensation.
+	const float MaxSavedPositionAge = 0.5f;
+	// End lag compensation code
+
+public:
 	/** Take damage, handle death */
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser) override;
 

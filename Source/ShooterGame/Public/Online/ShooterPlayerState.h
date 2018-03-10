@@ -9,7 +9,7 @@ class AShooterPlayerState : public APlayerState
 {
 	GENERATED_UCLASS_BODY()
 
-	
+
 	// Begin APlayerState interface
 	/** clear scores */
 	virtual void Reset() override;
@@ -113,8 +113,10 @@ protected:
 
 	/** helper for scoring points */
 	void ScorePoints(int32 Points);
+
 public:
-	UPROPERTY(EditAnywhere)
-	APlayerState* pstate;
-	int32 testing;
+	///@brief Overriding to avoid doing engine-style ping updates.
+	virtual void UpdatePing(float InPing) override;
+
+	virtual void CalculatePing(float NewPing);
 };
