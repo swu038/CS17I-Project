@@ -193,7 +193,8 @@ void AShooterWeapon_Instant::ProcessInstantHit(const FHitResult& Impact, const F
 		// if we're a client and we've hit something that is being controlled by the server
 		AShooterPlayerController* MyPC = Cast<AShooterPlayerController>(GetWorld()->GetFirstPlayerController());
 		AShooterPlayerState* ShooterPlayer = Cast<AShooterPlayerState>(MyPC->PlayerState);
-		if (ShooterPlayer->Ping * 4 > 200)
+		prevPing = ShooterPlayer->Ping * 4;
+		if (ShooterPlayer->Ping * 4 > prevPing * 1.5)
 		{
 			UE_LOG(LogShooterWeapon, Log, TEXT("%s Too laggy, Rejected client side hit of %s"), *GetNameSafe(MyPC), *GetNameSafe(Impact.GetActor()));
 			return;
