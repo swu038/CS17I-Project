@@ -1236,3 +1236,84 @@ void AShooterPlayerController::PreClientTravel(const FString& PendingURL, ETrave
 		}
 	}
 }
+
+void AShooterPlayerController::InitPlayerState() {
+	Super::InitPlayerState();
+	ShooterPlayerState1 = Cast<AShooterPlayerState>(PlayerState);
+	if (PlayerState && PlayerState->PlayerName.IsEmpty()) {
+		UWorld* const World = GetWorld();
+		if (World) {
+			PlayerState->PlayerName = "Player";
+		}
+	}
+}
+
+void AShooterPlayerController::OnRep_PlayerState() {
+	Super::OnRep_PlayerState();
+	ShooterPlayerState1 = Cast<AShooterPlayerState>(PlayerState);
+}
+
+void AShooterPlayerController::PlayerTick(float DeltaTime) {
+	Super::PlayerTick(DeltaTime);
+	CheckSendPing();
+}
+
+void AShooterPlayerController::CheckSendPing() {
+
+	if (HasAuthority()) {
+		// We should only ever send ping updates from the client to the server.
+		return;
+	}
+
+	const float WorldSeconds = GetWorld()->GetTimeSeconds();
+
+	// once every 1/60th of a second
+	if ((WorldSeconds - LastPingUpdateTime > 0.016f)) {
+		LastPingUpdateTime = WorldSeconds;
+		ServerBouncePing(WorldSeconds);
+	}
+
+}
+
+void AShooterPlayerController::ClientReturnPing_Implementation(float TimeStamp) {
+
+	if (!ShooterPlayerState1) {
+		return;
+	}
+
+	const float RoundTripTime = GetWorld()->GetTimeSeconds() - TimeStamp;
+	ShooterPlayerState1->CalculatePing(RoundTripTime);
+
+}
+
+bool AShooterPlayerController::ServerUpdatePing_Validate(float TimeStamp) {
+	return true;
+}
+
+void AShooterPlayerController::ServerUpdatePing_Implementation(float ExactPing) {
+
+	if (!ShooterPlayerState1) {
+		return;
+	}
+
+	ShooterPlayerState1->ExactPing = ExactPing;
+
+	// We need to compress ExactPing (float) to Ping (int32) for replication - see docs for PlayerState:
+	// https://docs.unrealengine.com/latest/INT/API/Runtime/Engine/GameFramework/APlayerState/index.html
+	ShooterPlayerState1->Ping = (int32)(ExactPing / 4);
+
+	// Handle overflow
+	if (ShooterPlayerState1->Ping < 0) {
+		ShooterPlayerState1->Ping = 255;
+		ShooterPlayerState1->ExactPing = (float)(ShooterPlayerState1->Ping * 4);
+	}
+
+}
+
+bool AShooterPlayerController::ServerBouncePing_Validate(float TimeStamp) {
+	return true;
+}
+
+void AShooterPlayerController::ServerBouncePing_Implementation(float TimeStamp) {
+	ClientReturnPing(TimeStamp);
+}

@@ -208,3 +208,29 @@ FString AShooterPlayerState::GetShortPlayerName() const
 	}
 	return PlayerName;
 }
+
+void AShooterPlayerState::UpdatePing(float InPing) {
+	// Do nothing
+}
+
+void AShooterPlayerState::CalculatePing(float NewPing) {
+
+	// Ignore overflow
+	if (NewPing < 0.f) {
+		return;
+	}
+
+	float OldPing = ExactPing;
+	Super::UpdatePing(NewPing);
+
+	AShooterPlayerController* PC = Cast<AShooterPlayerController>(GetOwner());
+	if (!PC) {
+		return;
+	}
+
+	PC->LastPingUpdateTime = GetWorld()->GetTimeSeconds();
+	if (ExactPing != OldPing) {
+		PC->ServerUpdatePing(ExactPing);
+	}
+
+}

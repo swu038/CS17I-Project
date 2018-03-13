@@ -448,7 +448,7 @@ void AShooterHUD::DrawKills()
 	TextItem.EnableShadow( FLinearColor::Black );
 
 	float SizeX, SizeY;
-	FString Text = LOCTEXT("Kills", "Ping:").ToString();
+	FString Text = LOCTEXT("Kills", "PING:").ToString();
 	Canvas->StrLen(BigFont, Text, SizeX, SizeY);
 
 	TextItem.Text = FText::FromString( Text );

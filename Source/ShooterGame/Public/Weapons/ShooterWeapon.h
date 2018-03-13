@@ -388,6 +388,17 @@ protected:
 	/** time of last successful weapon fire */
 	float LastFireTime;
 
+	// Franklin's code
+	/* time started shooting*/
+	float ShootStartTime;
+
+	/** time for shoot delay*/
+	float ShootDelayTime;
+
+	/* time for server to confirm hit */
+	float ServerConfirmTime;
+	// End Franklin's code
+
 	/** last time when this weapon was switched to */
 	float EquipStartedTime;
 

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Online.h"
+#include "Online/ShooterPlayerState.h"
 #include "ShooterPlayerController.generated.h"
 
 class AShooterHUD;
@@ -13,6 +14,48 @@ class AShooterPlayerController : public APlayerController
 	GENERATED_UCLASS_BODY()
 
 public:
+	// lag comp code
+	virtual void PlayerTick(float DeltaTime) override;
+
+
+	///@brief Last time this client's ping was updated.
+	UPROPERTY()
+		float LastPingUpdateTime;
+
+
+	///@brief Ran on the client. Checks whether or not we should
+	///       send a ping to the server - if so, calls ServerBouncePing.
+	UFUNCTION()
+		void CheckSendPing();
+
+
+	///@brief Request a ping update. Called on client.
+	UFUNCTION(Unreliable, Server, WithValidation)
+		virtual void ServerBouncePing(float TimeStamp);
+
+
+	///@brief Respond to a client-requested ping update.
+	UFUNCTION(Unreliable, Client)
+		virtual void ClientReturnPing(float TimeStamp);
+
+
+	///@brief Client informs server of new ping.
+	UFUNCTION(Unreliable, Server, WithValidation)
+		virtual void ServerUpdatePing(float TimeStamp);
+
+
+	UPROPERTY(BlueprintReadOnly)
+		AShooterPlayerState* ShooterPlayerState1;
+
+
+	void InitPlayerState();
+
+
+	virtual void OnRep_PlayerState();
+
+	// end lag comp code
+
+
 	/** sets spectator location and rotation */
 	UFUNCTION(reliable, client)
 	void ClientSetSpectatorCamera(FVector CameraLocation, FRotator CameraRotation);

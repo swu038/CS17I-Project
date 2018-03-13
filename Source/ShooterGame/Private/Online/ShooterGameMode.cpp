@@ -264,6 +264,9 @@ void AShooterGameMode::PreLogin(const FString& Options, const FString& Address, 
 }
 
 
+// is this how i change the spectator mode?
+// change this to clients only
+// and make a server only version alongside it
 void AShooterGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);

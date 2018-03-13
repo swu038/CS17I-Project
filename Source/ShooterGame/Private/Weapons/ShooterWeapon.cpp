@@ -43,6 +43,9 @@ AShooterWeapon::AShooterWeapon(const FObjectInitializer& ObjectInitializer) : Su
 	CurrentAmmoInClip = 0;
 	BurstCounter = 0;
 	LastFireTime = 0.0f;
+	ShootStartTime = 0.0f;
+	ShootDelayTime = 0.0f;
+	ServerConfirmTime = 0.0f;
 
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.TickGroup = TG_PrePhysics;
@@ -220,7 +223,6 @@ void AShooterWeapon::StartFire()
 	if (Role < ROLE_Authority)
 	{
 		ServerStartFire();
-		
 	}
 
 	if (!bWantsToFire)
@@ -385,6 +387,18 @@ void AShooterWeapon::UseAmmo()
 		CurrentAmmo--;
 	}
 
+	ShootDelayTime = GetWorld()->GetTimeSeconds() - ShootStartTime;
+	// Trying to output to see if ShootDelay exists
+	if (GEngine)
+	{
+		const int32 MyNumberKey = 0; // Not passing -1 so each time through we will update the existing message instead  
+									 // of making a new one  
+		static const FString ShootDelayText(TEXT("ServerConfirmTime: "));
+		GEngine->AddOnScreenDebugMessage(MyNumberKey, 5.f, FColor::Yellow, ShootDelayText + FString::SanitizeFloat(ServerConfirmTime));
+	}
+
+	// end try
+
 	AShooterAIController* BotAI = MyPawn ? Cast<AShooterAIController>(MyPawn->GetController()) : NULL;	
 	AShooterPlayerController* PlayerController = MyPawn ? Cast<AShooterPlayerController>(MyPawn->GetController()) : NULL;
 	if (BotAI)
@@ -473,6 +487,7 @@ void AShooterWeapon::HandleFiring()
 	}
 
 	LastFireTime = GetWorld()->GetTimeSeconds();
+	ShootStartTime = GetWorld()->GetTimeSeconds();
 }
 
 bool AShooterWeapon::ServerHandleFiring_Validate()
@@ -485,6 +500,11 @@ void AShooterWeapon::ServerHandleFiring_Implementation()
 	const bool bShouldUpdateAmmo = (CurrentAmmoInClip > 0 && CanFire());
 
 	HandleFiring();
+	ServerConfirmTime = GetWorld()->GetTimeSeconds() - ShootStartTime;
+	if (GEngine) {
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("ServerHandleFiring_Implementation"));
+	}
+		
 
 	if (bShouldUpdateAmmo)
 	{
