@@ -44,16 +44,23 @@ void AShooterWeapon_Instant::FireWeapon()
 bool AShooterWeapon_Instant::ServerNotifyHit_Validate(const FHitResult& Impact, FVector_NetQuantizeNormal ShootDir, int32 RandomSeed, float ReticleSpread)
 {
 	//UE_LOG(LogTemp, Display, TEXT("Hit"));
+<<<<<<< HEAD
 	AShooterPlayerController* MyPC = Cast<AShooterPlayerController>(GetWorld()->GetFirstPlayerController());
 	AShooterPlayerState* ShooterPlayer = Cast<AShooterPlayerState>(MyPC->PlayerState);
 	
+=======
+>>>>>>> master
 	return true;
 }
 
 void AShooterWeapon_Instant::ServerNotifyHit_Implementation(const FHitResult& Impact, FVector_NetQuantizeNormal ShootDir, int32 RandomSeed, float ReticleSpread)
 {
 	const float WeaponAngleDot = FMath::Abs(FMath::Sin(ReticleSpread * PI / 180.f));
+<<<<<<< HEAD
 	UE_LOG(LogTemp, Display, TEXT("Notifying Server"));
+=======
+
+>>>>>>> master
 	// if we have an instigator, calculate dot between the view and the shot
 	if (Instigator && (Impact.GetActor() || Impact.bBlockingHit))
 	{
@@ -110,6 +117,7 @@ void AShooterWeapon_Instant::ServerNotifyHit_Implementation(const FHitResult& Im
 					//	UE_LOG(LogShooterWeapon, Log, TEXT("%s Rejected client side hit of %s (outside bounding box tolerance)"), *GetNameSafe(this), *GetNameSafe(Impact.GetActor()));
 					//}
 					AShooterPlayerController* MyPC = Cast<AShooterPlayerController>(GetWorld()->GetFirstPlayerController());
+<<<<<<< HEAD
 					for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
 					{
 						// all local players get death messages so they can update their huds.
@@ -128,6 +136,10 @@ void AShooterWeapon_Instant::ServerNotifyHit_Implementation(const FHitResult& Im
 					}
 					AShooterPlayerState* ShooterPlayer = Cast<AShooterPlayerState>(MyPC->PlayerState);
 					//UE_LOG(LogShooterWeapon, Log, TEXT("%s Too laggy, Rejected client side hit of %s"), *GetNameSafe(MyPC), *GetNameSafe(Impact.GetActor()));
+=======
+					AShooterPlayerState* ShooterPlayer = Cast<AShooterPlayerState>(MyPC->PlayerState);
+
+>>>>>>> master
 					if (MyPC == NULL)
 					{
 						UE_LOG(LogTemp, Display, TEXT("Player Controller Missing also Player State"));
@@ -140,9 +152,15 @@ void AShooterWeapon_Instant::ServerNotifyHit_Implementation(const FHitResult& Im
 					FString Text = FString::FromInt(ShooterPlayer->Ping * 4);
 					GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, Text);
 					UE_LOG(LogTemp, Display, TEXT("Hit Player Object"));
+<<<<<<< HEAD
 					if (ShooterPlayer->Ping * 4 > 300)
 					{
 						UE_LOG(LogShooterWeapon, Log, TEXT("%s Ping too high, Rejected client side hit of %s"), *GetNameSafe(this), *GetNameSafe(Impact.GetActor()));
+=======
+					if (ShooterPlayer->Ping > 300)
+					{
+						UE_LOG(LogShooterWeapon, Log, TEXT("%s Too laggy, Rejected client side hit of %s"), *GetNameSafe(this), *GetNameSafe(Impact.GetActor()));
+>>>>>>> master
 					}
 					else
 					{
@@ -191,6 +209,7 @@ void AShooterWeapon_Instant::ProcessInstantHit(const FHitResult& Impact, const F
 	if (MyPawn && MyPawn->IsLocallyControlled() && GetNetMode() == NM_Client)
 	{
 		// if we're a client and we've hit something that is being controlled by the server
+<<<<<<< HEAD
 		AShooterPlayerController* MyPC = Cast<AShooterPlayerController>(GetWorld()->GetFirstPlayerController());
 		AShooterPlayerState* ShooterPlayer = Cast<AShooterPlayerState>(MyPC->PlayerState);
 		prevPing = ShooterPlayer->Ping * 4;
@@ -203,6 +222,11 @@ void AShooterWeapon_Instant::ProcessInstantHit(const FHitResult& Impact, const F
 		{
 			// notify the server of the hit
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, "Notify Server Hit Authority");
+=======
+		if (Impact.GetActor() && Impact.GetActor()->GetRemoteRole() == ROLE_Authority)
+		{
+			// notify the server of the hit
+>>>>>>> master
 			ServerNotifyHit(Impact, ShootDir, RandomSeed, ReticleSpread);
 		}
 		else if (Impact.GetActor() == NULL)
@@ -210,21 +234,32 @@ void AShooterWeapon_Instant::ProcessInstantHit(const FHitResult& Impact, const F
 			if (Impact.bBlockingHit)
 			{
 				// notify the server of the hit
+<<<<<<< HEAD
 				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, "Notify Server Hit Non Authority");
+=======
+>>>>>>> master
 				ServerNotifyHit(Impact, ShootDir, RandomSeed, ReticleSpread);
 			}
 			else
 			{
 				// notify server of the miss
+<<<<<<< HEAD
 				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, "Notify Server of Miss");
+=======
+>>>>>>> master
 				ServerNotifyMiss(ShootDir, RandomSeed, ReticleSpread);
 			}
 		}
 	}
 
 	// process a confirmed hit
+<<<<<<< HEAD
 	UE_LOG(LogTemp, Display, TEXT("Process Instant Hit Complete"));
 	//ProcessInstantHit_Confirmed(Impact, Origin, ShootDir, RandomSeed, ReticleSpread);
+=======
+	UE_LOG(LogTemp, Display, TEXT("Process Instant Hit Anyways"));
+	ProcessInstantHit_Confirmed(Impact, Origin, ShootDir, RandomSeed, ReticleSpread);
+>>>>>>> master
 }
 
 void AShooterWeapon_Instant::ProcessInstantHit_Confirmed(const FHitResult& Impact, const FVector& Origin, const FVector& ShootDir, int32 RandomSeed, float ReticleSpread)

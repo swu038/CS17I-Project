@@ -86,7 +86,11 @@ class AShooterWeapon_Instant : public AShooterWeapon
 
 	/** get current spread */
 	float GetCurrentSpread() const;
+<<<<<<< HEAD
 	
+=======
+
+>>>>>>> master
 protected:
 
 	virtual EAmmoType GetAmmoType() const override
@@ -116,7 +120,11 @@ protected:
 
 	/** current spread from continuous firing */
 	float CurrentFiringSpread;
+<<<<<<< HEAD
 	
+=======
+
+>>>>>>> master
 	//////////////////////////////////////////////////////////////////////////
 	// Weapon usage
 
@@ -161,6 +169,9 @@ protected:
 
 	/** spawn trail effect */
 	void SpawnTrailEffect(const FVector& EndPoint);
+<<<<<<< HEAD
 public:
 	int wping;
+=======
+>>>>>>> master
 };
