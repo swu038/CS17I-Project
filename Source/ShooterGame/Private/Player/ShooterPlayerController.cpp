@@ -1317,3 +1317,16 @@ bool AShooterPlayerController::ServerBouncePing_Validate(float TimeStamp) {
 void AShooterPlayerController::ServerBouncePing_Implementation(float TimeStamp) {
 	ClientReturnPing(TimeStamp);
 }
+
+float AShooterPlayerController::GetPredictionTime() {
+
+	if (!PlayerState) {
+		return 0.f;
+	}
+
+	const float ClampedPingMillis = FMath::Clamp(PlayerState->ExactPing, 0.f, MaxPredictionPing);
+	const float ClampedPingSeconds = (ClampedPingMillis / 1000.0f);
+
+	return ClampedPingSeconds * PredictionCorrectionFactor;
+
+}

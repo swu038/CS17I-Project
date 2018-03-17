@@ -3,6 +3,7 @@
 #pragma once
 
 #include "ShooterWeapon.h"
+#include "Player/ShooterPlayerController.h"
 #include "ShooterWeapon_Instant.generated.h"
 
 class AShooterImpactEffect;
@@ -161,4 +162,10 @@ protected:
 
 	/** spawn trail effect */
 	void SpawnTrailEffect(const FVector& EndPoint);
+
+public:
+	float wping;
+	
+	UFUNCTION()
+	void getPrediction();
 };

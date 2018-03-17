@@ -87,11 +87,12 @@ void AShooterWeapon_Instant::ServerNotifyHit_Implementation(const FHitResult& Im
 						FMath::Abs(Impact.Location.X - BoxCenter.X) < BoxExtent.X &&
 						FMath::Abs(Impact.Location.Y - BoxCenter.Y) < BoxExtent.Y)
 					{
+						UE_LOG(LogShooterWeapon, Log, TEXT("Accepted client side hit"));
 						ProcessInstantHit_Confirmed(Impact, Origin, ShootDir, RandomSeed, ReticleSpread);
 					}
 					else
 					{
-						UE_LOG(LogShooterWeapon, Log, TEXT("%s Rejected client side hit of %s (outside bounding box tolerance)"), *GetNameSafe(this), *GetNameSafe(Impact.GetActor()));
+						UE_LOG(LogShooterWeapon, Log, TEXT("%s Rejected client side hit of %s (outside hitbox tolerance)"), *GetNameSafe(this), *GetNameSafe(Impact.GetActor()));
 					}
 				}
 			}
@@ -309,4 +310,10 @@ void AShooterWeapon_Instant::GetLifetimeReplicatedProps( TArray< FLifetimeProper
 	Super::GetLifetimeReplicatedProps( OutLifetimeProps );
 
 	DOREPLIFETIME_CONDITION( AShooterWeapon_Instant, HitNotify, COND_SkipOwner );
+}
+
+void AShooterWeapon_Instant::getPrediction() 
+{
+	UE_LOG(LogTemp, Warning, TEXT("Entered getPrediction, trying to get ping"));
+	// AShooterPlayerController* MyPC = GetWorld()->GetFirstPlayerController();
 }

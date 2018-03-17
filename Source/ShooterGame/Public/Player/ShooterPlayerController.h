@@ -47,6 +47,23 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 		AShooterPlayerState* ShooterPlayerState1;
 
+	///@brief Max amount of ping to predict ahead for.
+	const float MaxPredictionPing = 255.0f;
+
+	///@brief Used to correct prediction error.
+	///       We've found that a value of 1.8 here seems to be
+	///       'good enough' for our use case. It's wise to play around
+	///       with the implementation of GetPredictionTime()
+	///       in your project - the time returned by it is extremely
+	///       crucial in getting accurate lag compensation.
+	///
+	const float PredictionCorrectionFactor = 1.8f;
+
+
+	///@brief Returns amount of time, in seconds, to tick to make up
+	///       for network lag.
+	virtual float GetPredictionTime();
+
 
 	void InitPlayerState();
 

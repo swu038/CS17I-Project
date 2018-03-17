@@ -16,10 +16,10 @@ enum class EHitboxType : uint8 {
 	LowerTorso	    UMETA(DisplayName = "LowerTorso"),
 	UpperLeftArm    UMETA(DisplayName = "UpperLeftArm"),
 	LowerLeftArm    UMETA(DisplayName = "LowerLeftArm"),
-	LeftHand        UMETA(DisplayName = "RightFoot"),
+	LeftHand        UMETA(DisplayName = "LeftHand"),
 	UpperRightArm   UMETA(DisplayName = "UpperRightArm"),
 	LowerRightArm   UMETA(DisplayName = "LowerRightArm"),
-	RightHand       UMETA(DisplayName = "RightFoot"),
+	RightHand       UMETA(DisplayName = "RightHand"),
 	UpperLeftLeg    UMETA(DisplayName = "UpperLeftLeg"),
 	LowerLeftLeg    UMETA(DisplayName = "LowerLeftLeg"),
 	LeftFoot        UMETA(DisplayName = "LeftFoot"),
@@ -537,8 +537,8 @@ private:
 	TArray<FSavedPosition> SavedPositions;
 
 	///@brief Maximum time to hold onto SavedPositions.
-	///       500ms of Lag Compensation.
-	const float MaxSavedPositionAge = 0.5f;
+	///       20ms of Lag Compensation.
+	const float MaxSavedPositionAge = 0.02f;
 	// End lag compensation code
 
 public:
