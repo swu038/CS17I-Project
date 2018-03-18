@@ -20,6 +20,7 @@
 #include "ShooterGameViewportClient.h"
 #include "Sound/SoundNodeLocalPlayer.h"
 #include "AudioThread.h"
+#include "Weapons/ShooterWeapon_Instant.h"
 
 #define  ACH_FRAG_SOMEONE	TEXT("ACH_FRAG_SOMEONE")
 #define  ACH_SOME_KILLS		TEXT("ACH_SOME_KILLS")
@@ -1256,6 +1257,9 @@ void AShooterPlayerController::OnRep_PlayerState() {
 void AShooterPlayerController::PlayerTick(float DeltaTime) {
 	Super::PlayerTick(DeltaTime);
 	CheckSendPing();
+	
+
+	
 }
 
 void AShooterPlayerController::CheckSendPing() {
@@ -1283,7 +1287,7 @@ void AShooterPlayerController::ClientReturnPing_Implementation(float TimeStamp) 
 
 	const float RoundTripTime = GetWorld()->GetTimeSeconds() - TimeStamp;
 	ShooterPlayerState1->CalculatePing(RoundTripTime);
-
+	
 }
 
 bool AShooterPlayerController::ServerUpdatePing_Validate(float TimeStamp) {

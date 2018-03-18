@@ -273,7 +273,7 @@ void AShooterCharacter::DrawSavedPositions(const TArray<FSavedPosition> SavedPos
 	const uint8 DepthPriority = 0;
 	const float BoxThickness = 0.75f;
 	const bool PersistentLines = true;
-
+	//UE_LOG(LogTemp, Display, TEXT("Drawing Hitboxes"));
 	for (FSavedPosition SavedPosition : SavedPositions) {
 		for (FSavedHitbox SavedHitbox : SavedPosition.Hitboxes) {
 			DrawDebugBox(

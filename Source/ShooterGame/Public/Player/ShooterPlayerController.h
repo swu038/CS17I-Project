@@ -14,6 +14,7 @@ class AShooterPlayerController : public APlayerController
 	GENERATED_UCLASS_BODY()
 
 public:
+
 	// lag comp code
 	virtual void PlayerTick(float DeltaTime) override;
 
