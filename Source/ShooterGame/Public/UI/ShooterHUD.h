@@ -9,7 +9,7 @@ struct FHitData
 {
 	/** Last hit time. */
 	float HitTime;
-
+	
 	/** strength of hit icon */
 	float HitPercentage;
 
@@ -31,7 +31,7 @@ struct FDeathMessage
 
 	/** Killer is local player. */
 	uint8 bKillerIsOwner : 1;
-
+	
 	/** Victim is local player. */
 	uint8 bVictimIsOwner : 1;
 
@@ -39,7 +39,7 @@ struct FDeathMessage
 	int32 KillerTeamNum;
 
 	/** Team number of the victim. */
-	int32 VictimTeamNum;
+	int32 VictimTeamNum; 
 
 	/** timestamp for removing message */
 	float HideTime;
@@ -52,7 +52,7 @@ struct FDeathMessage
 		: bKillerIsOwner(false)
 		, bVictimIsOwner(false)
 		, KillerTeamNum(0)
-		, VictimTeamNum(0)
+		, VictimTeamNum(0)		
 		, HideTime(0.f)
 	{
 	}
@@ -71,12 +71,12 @@ public:
 	virtual void DrawHUD() override;
 
 	/**
-	* Sent from pawn hit, used to calculate hit notification overlay for drawing.
-	*
-	* @param	DamageTaken		The amount of damage.
-	* @param	DamageEvent		The actual damage event.
-	* @param	PawnInstigator	The pawn that did the damage.
-	*/
+	 * Sent from pawn hit, used to calculate hit notification overlay for drawing.
+	 *
+	 * @param	DamageTaken		The amount of damage.
+	 * @param	DamageEvent		The actual damage event.
+	 * @param	PawnInstigator	The pawn that did the damage.
+	 */
 	void NotifyWeaponHit(float DamageTaken, struct FDamageEvent const& DamageEvent, class APawn* PawnInstigator);
 
 	/** Sent from ShooterWeapon, shows NO AMMO text. */
@@ -85,11 +85,11 @@ public:
 	/** Notifies we have hit the enemy. */
 	void NotifyEnemyHit();
 
-	/**
-	* Set state of current match.
-	*
-	* @param	NewState	The new match state.
-	*/
+	/** 
+	 * Set state of current match.
+	 *
+	 * @param	NewState	The new match state.
+	 */
 	void SetMatchState(EShooterMatchState::Type NewState);
 
 	/** Get state of current match. */
@@ -101,53 +101,50 @@ public:
 	/** Toggles scoreboard */
 	void ToggleScoreboard();
 
-	/**
-	* Toggles in game scoreboard.
-	* Note:Will not display if the game menu is visible.
+	/** 
+	 * Toggles in game scoreboard.
+	 * Note:Will not display if the game menu is visible.
 
-	* @param	bEnable	Required scoreboard display state.
-	* @param	bFocus	Give keyboard focus to the scoreboard.
-	* @return	true, if the scoreboard visibility changed
-	*/
+	 * @param	bEnable	Required scoreboard display state.
+	 * @param	bFocus	Give keyboard focus to the scoreboard.
+	 * @return	true, if the scoreboard visibility changed
+	 */
 	bool ShowScoreboard(bool bEnable, bool bFocus = false);
 
-	/**
-	* Add death message.
-	*
-	* @param	KillerPlayerState	Player that did the killings state.
-	* @param	VictimPlayerState	Played that was killed state.
-	* @param	KillerDamageType	The type of damaged that caused the death.
-	*/
+	/** 
+	 * Add death message.
+	 *
+	 * @param	KillerPlayerState	Player that did the killings state.
+	 * @param	VictimPlayerState	Played that was killed state.
+	 * @param	KillerDamageType	The type of damaged that caused the death.
+	 */
 	void ShowDeathMessage(class AShooterPlayerState* KillerPlayerState, class AShooterPlayerState* VictimPlayerState, const UDamageType* KillerDamageType);
 
 	/*
-	* Toggle chat window visibility.
-	*
-	*/
+	 * Toggle chat window visibility.
+	 *
+	 */
 	void ToggleChat();
 
-	/**
-	* Set chat window visibility.
-	*
-	* @param	RequiredVisibility	The required visibility.
-	*/
-	void SetChatVisibilty(const EVisibility RequiredVisibility);
+	/** 
+	 * Set chat window visibility.
+	 *
+	 * @param	RequiredVisibility	The required visibility.
+	 */
+	void SetChatVisibilty( const EVisibility RequiredVisibility );
 
 	/*
-	* Add a string to the chat window.
-	*
-	* @param	ChatString	The string to add.
-	* @param	bWantFocus	Should we set the chat window to focus
-	*/
+	 * Add a string to the chat window.
+	 *
+	 * @param	ChatString	The string to add.
+	 * @param	bWantFocus	Should we set the chat window to focus
+	 */
 	void AddChatLine(const FText& ChatString, bool bWantFocus);
 
 	/* Is the match over (IE Is the state Won or Lost). */
 	bool IsMatchOver() const;
-
+		
 protected:
-	// Store recent pings.
-	TArray<double> recentPings;
-
 	/** Floor for automatic hud scaling. */
 	static const float MinHudScale;
 
@@ -175,75 +172,78 @@ protected:
 	/** How long till enemy hit notify fades out completely. */
 	float LastEnemyHitDisplayTime;
 
-	/* Icons for high pings and instability. */
+	/////////////////////////////////////////////////////////////
+	//added
 	UPROPERTY()
-		FCanvasIcon OrangeHighPingIndicator;
+		FCanvasIcon IconT;
 
 	UPROPERTY()
-		FCanvasIcon RedHighPingIndicator;
+		FCanvasIcon IconO;
 
 	UPROPERTY()
-		FCanvasIcon RedUnstablePingIndicator;
+		FCanvasIcon IconPL;
+
+	/////////////////////////////////////////////////////////////
 
 	/** Icons for hit indicator. */
 	UPROPERTY()
-		FCanvasIcon HitNotifyIcon[8];
+	FCanvasIcon HitNotifyIcon[8];
 
 	/** kills background icon. */
 	UPROPERTY()
-		FCanvasIcon KillsBg;
+	FCanvasIcon KillsBg;
 
 	/** Match timer and player position background icon. */
 	UPROPERTY()
-		FCanvasIcon TimePlaceBg;
+	FCanvasIcon TimePlaceBg;
 
 	/** Primary weapon background icon. */
 	UPROPERTY()
-		FCanvasIcon PrimaryWeapBg;
+	FCanvasIcon PrimaryWeapBg;
 
 	/** Secondary weapon background icon */
 	UPROPERTY()
-		FCanvasIcon SecondaryWeapBg;
+	FCanvasIcon SecondaryWeapBg;
 
 	/** Crosshair icons (left, top, right, bottom and center). */
 	UPROPERTY()
-		FCanvasIcon Crosshair[5];
+	FCanvasIcon Crosshair[5];
 
 	/** On crosshair indicator that we hit someone. */
 	UPROPERTY()
-		FCanvasIcon HitNotifyCrosshair;
+	FCanvasIcon HitNotifyCrosshair;
 
 	/** Death messages background icon. */
 	UPROPERTY()
-		FCanvasIcon DeathMessagesBg;
+	FCanvasIcon DeathMessagesBg;
 
 	/** Health bar background icon. */
 	UPROPERTY()
-		FCanvasIcon HealthBarBg;
+	FCanvasIcon HealthBarBg;
 
 	/** Health bar icon. */
 	UPROPERTY()
-		FCanvasIcon HealthBar;
+	FCanvasIcon HealthBar;
 
 	/** Health icon on the health bar. */
 	UPROPERTY()
-		FCanvasIcon HealthIcon;
+	FCanvasIcon HealthIcon;
 
 	/** Kills icon. */
 	UPROPERTY()
-		FCanvasIcon KillsIcon;
+	FCanvasIcon KillsIcon;
 
 	/** Bigger killed icon. */
 	UPROPERTY()
-		FCanvasIcon KilledIcon;
+	FCanvasIcon KilledIcon;
 
 	/** Timer icon. */
 	UPROPERTY()
-		FCanvasIcon TimerIcon;
+	FCanvasIcon TimerIcon;
 
 	/** Podium icon. */
 	UPROPERTY()
-		FCanvasIcon PlaceIcon;
+	FCanvasIcon PlaceIcon;
 
 	/** UI scaling factor for other resolutions than Full HD. */
 	float ScaleUI;
@@ -266,38 +266,39 @@ protected:
 	/** Offsets to display hit indicator parts. */
 	FVector2D Offsets[8];
 
+	//added
 	UPROPERTY()
-		UTexture2D* RedUnstablePing;
+	UTexture2D* IconTwo;
 
 	UPROPERTY()
-		UTexture2D* RedHighPing;
+	UTexture2D* IconOne;
 
 	UPROPERTY()
-		UTexture2D* OrangeHighPing;
+	UTexture2D* IconPacketLoss; 
 
 	/** Texture for hit indicator. */
 	UPROPERTY()
-		UTexture2D* HitNotifyTexture;
+	UTexture2D* HitNotifyTexture;
 
 	/** texture for HUD elements. */
 	UPROPERTY()
-		UTexture2D* HUDMainTexture;
+	UTexture2D* HUDMainTexture;
 
 	/** Texture for HUD elements. */
 	UPROPERTY()
-		UTexture2D* HUDAssets02Texture;
+	UTexture2D* HUDAssets02Texture;
 
 	/** Overlay shown when health is low. */
 	UPROPERTY()
-		UTexture2D* LowHealthOverlayTexture;
+	UTexture2D* LowHealthOverlayTexture;
 
 	/** Large font - used for ammo display etc. */
 	UPROPERTY()
-		UFont* BigFont;
+	UFont* BigFont;
 
 	/** Normal font - used for death messages and such. */
 	UPROPERTY()
-		UFont* NormalFont;
+	UFont* NormalFont;
 
 	/** General offset for HUD elements. */
 	float Offset;
@@ -312,7 +313,7 @@ protected:
 	EShooterMatchState::Type MatchState;
 
 	/** Is the scoreboard widget on screen? */
-	uint32 bIsScoreBoardVisible : 1;
+	uint32 bIsScoreBoardVisible:1;
 
 	/** Scoreboard widget. */
 	TSharedPtr<class SShooterScoreboardWidget>	ScoreboardWidget;
@@ -332,11 +333,11 @@ protected:
 	/** Called every time game is started. */
 	virtual void PostInitializeComponents() override;
 
-	/**
-	* Converts floating point seconds to MM:SS string.
-	*
-	* @param TimeSeconds		The time to get a string for.
-	*/
+	/** 
+	 * Converts floating point seconds to MM:SS string.
+	 *
+	 * @param TimeSeconds		The time to get a string for.
+	 */
 	FString GetTimeString(float TimeSeconds);
 
 	/** Draws weapon HUD. */
@@ -348,15 +349,18 @@ protected:
 	/** Draw player's health bar. */
 	void DrawHealth();
 
-	/* Display ping indicator */
+	//added draws ping level indicator
 	void DrawIndicator();
+
+	//added draws packet loss indicator
+	void DrawPacketLoss();
 
 	/** Draws match timer and player position. */
 	void DrawMatchTimerAndPosition();
 
 	/** Draws weapon crosshair. */
 	void DrawCrosshair();
-
+	
 	/** Draws hit indicator. */
 	void DrawHitIndicator();
 
@@ -368,10 +372,10 @@ protected:
 	void OnPlayerTalkingStateChanged(TSharedRef<const FUniqueNetId> TalkingPlayerId, bool bIsTalking);
 
 	/*
-	* Draw the most recently killed player if needed
-	*
-	* @return Returns the bottom of the message or 0 if not drawn.
-	*/
+	 * Draw the most recently killed player if needed
+	 *
+	 * @return Returns the bottom of the message or 0 if not drawn.
+	 */
 	float DrawRecentlyKilledPlayer();
 
 	/** Temporary helper for drawing text-in-a-box. */
@@ -381,16 +385,16 @@ protected:
 	void MakeUV(FCanvasIcon& Icon, FVector2D& UV0, FVector2D& UV1, uint16 U, uint16 V, uint16 UL, uint16 VL);
 
 	/*
-	* Create the chat widget if it doesn't already exist.
-	*
-	* @return		true if the widget was created.
-	*/
+	 * Create the chat widget if it doesn't already exist.
+	 *
+	 * @return		true if the widget was created.
+	 */
 	bool TryCreateChatWidget();
 
 	/*
-	* Add information string that will be displayed on the hud. They are added as required and rendered together to prevent overlaps
-	*
-	* @param InInfoString	InInfoString
+	 * Add information string that will be displayed on the hud. They are added as required and rendered together to prevent overlaps 
+	 * 
+	 * @param InInfoString	InInfoString
 	*/
 	void AddMatchInfoString(const FCanvasTextItem InfoItem);
 
@@ -404,9 +408,5 @@ protected:
 	* @returns The next Y position to draw any further strings
 	*/
 	float ShowInfoItems(float YOffset, float TextScale);
-
-	double avg(TArray<double> &);
-
-	void storeNewPing(TArray<double> &, double);
-
+	
 };
