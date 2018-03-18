@@ -530,15 +530,16 @@ public:
 	FVector GetHitboxExtent(EHitboxType HitboxType);
 
 	void DrawSavedPositions(const TArray<FSavedPosition> SavedPositions);
-
+	
+	TArray<FSavedPosition> GetSavedPositions(const TArray<FSavedPosition> SavedPositions);
 private:
 	TArray<FSavedHitbox> BuildSavedHitboxArr();
 
 	TArray<FSavedPosition> SavedPositions;
 
 	///@brief Maximum time to hold onto SavedPositions.
-	///       20ms of Lag Compensation.
-	const float MaxSavedPositionAge = 0.02f;
+	///       500ms of Lag Compensation.
+	const float MaxSavedPositionAge = 0.5f;
 	// End lag compensation code
 
 public:

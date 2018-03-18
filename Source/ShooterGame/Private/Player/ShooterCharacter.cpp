@@ -569,6 +569,11 @@ void AShooterCharacter::DrawSavedPositions(const TArray<FSavedPosition> SavedPos
 
 }
 
+TArray<FSavedPosition> AShooterCharacter::GetSavedPositions(const TArray<FSavedPosition> SavedPositions) {
+	
+	return SavedPositions;
+}
+
 // End lag compensation code
 
 void AShooterCharacter::PostInitializeComponents()
