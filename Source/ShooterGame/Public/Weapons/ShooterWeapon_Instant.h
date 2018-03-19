@@ -3,6 +3,7 @@
 #pragma once
 
 #include "ShooterWeapon.h"
+#include "Player/ShooterPlayerController.h"
 #include "ShooterWeapon_Instant.generated.h"
 
 class AShooterImpactEffect;
@@ -71,10 +72,10 @@ struct FInstantWeaponData
 		FiringSpreadIncrement = 1.0f;
 		FiringSpreadMax = 10.0f;
 		WeaponRange = 10000.0f;
-		HitDamage = 10;
+		HitDamage = 1;
 		DamageType = UDamageType::StaticClass();
-		ClientSideHitLeeway = 200.0f;
-		AllowedViewDotHitDir = 0.8f;
+		ClientSideHitLeeway = 0.0f;
+		AllowedViewDotHitDir = 0.0f;
 	}
 };
 
@@ -165,7 +166,10 @@ protected:
 
 	/** spawn trail effect */
 	void SpawnTrailEffect(const FVector& EndPoint);
+
 public:
 	float wping;
-
+	
+	UFUNCTION()
+	void getPrediction();
 };

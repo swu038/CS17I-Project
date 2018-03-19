@@ -1257,9 +1257,6 @@ void AShooterPlayerController::OnRep_PlayerState() {
 void AShooterPlayerController::PlayerTick(float DeltaTime) {
 	Super::PlayerTick(DeltaTime);
 	CheckSendPing();
-	
-
-	
 }
 
 void AShooterPlayerController::CheckSendPing() {
@@ -1287,7 +1284,6 @@ void AShooterPlayerController::ClientReturnPing_Implementation(float TimeStamp) 
 
 	const float RoundTripTime = GetWorld()->GetTimeSeconds() - TimeStamp;
 	ShooterPlayerState1->CalculatePing(RoundTripTime);
-	
 }
 
 bool AShooterPlayerController::ServerUpdatePing_Validate(float TimeStamp) {
@@ -1320,4 +1316,15 @@ bool AShooterPlayerController::ServerBouncePing_Validate(float TimeStamp) {
 
 void AShooterPlayerController::ServerBouncePing_Implementation(float TimeStamp) {
 	ClientReturnPing(TimeStamp);
+
+float AShooterPlayerController::GetPredictionTime() {
+
+	if (!PlayerState) {
+		return 0.f;
+	}
+
+	const float ClampedPingMillis = FMath::Clamp(PlayerState->ExactPing, 0.f, MaxPredictionPing);
+	const float ClampedPingSeconds = (ClampedPingMillis / 1000.0f);
+
+	return ClampedPingSeconds * PredictionCorrectionFactor;
 }

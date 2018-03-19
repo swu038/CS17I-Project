@@ -501,11 +501,13 @@ void AShooterWeapon::ServerHandleFiring_Implementation()
 
 	HandleFiring();
 	ServerConfirmTime = GetWorld()->GetTimeSeconds() - ShootStartTime;
+
+	/*
 	if (GEngine) {
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("ServerHandleFiring_Implementation"));
 	}
-		
-
+	*/
+  
 	if (bShouldUpdateAmmo)
 	{
 		// update ammo
@@ -744,11 +746,15 @@ FHitResult AShooterWeapon::WeaponTrace(const FVector& StartTrace, const FVector&
 
 	// Perform trace to retrieve hit info
 	FCollisionQueryParams TraceParams(SCENE_QUERY_STAT(WeaponTrace), true, Instigator);
+	// TraceParams.bTraceComplex = true;
 	TraceParams.bTraceAsyncScene = true;
 	TraceParams.bReturnPhysicalMaterial = true;
 
 	FHitResult Hit(ForceInit);
-	GetWorld()->LineTraceSingleByChannel(Hit, StartTrace, EndTrace, COLLISION_WEAPON, TraceParams);
+	// GetWorld()->LineTraceSingleByChannel(Hit, StartTrace, EndTrace, COLLISION_WEAPON, TraceParams);
+	// DrawDebugLine(GetWorld(), StartTrace, EndTrace, FColor::Red, false, 10.0f, 0, 1.0f);
+	GetWorld()->LineTraceSingleByChannel(Hit, StartTrace, EndTrace, ECC_GameTraceChannel4, TraceParams);
+	
 
 	return Hit;
 }

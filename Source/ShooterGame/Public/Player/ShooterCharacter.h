@@ -16,10 +16,10 @@ enum class EHitboxType : uint8 {
 	LowerTorso	    UMETA(DisplayName = "LowerTorso"),
 	UpperLeftArm    UMETA(DisplayName = "UpperLeftArm"),
 	LowerLeftArm    UMETA(DisplayName = "LowerLeftArm"),
-	LeftHand        UMETA(DisplayName = "RightFoot"),
+	LeftHand        UMETA(DisplayName = "LeftHand"),
 	UpperRightArm   UMETA(DisplayName = "UpperRightArm"),
 	LowerRightArm   UMETA(DisplayName = "LowerRightArm"),
-	RightHand       UMETA(DisplayName = "RightFoot"),
+	RightHand       UMETA(DisplayName = "RightHand"),
 	UpperLeftLeg    UMETA(DisplayName = "UpperLeftLeg"),
 	LowerLeftLeg    UMETA(DisplayName = "LowerLeftLeg"),
 	LeftFoot        UMETA(DisplayName = "LeftFoot"),
@@ -530,10 +530,12 @@ public:
 	FVector GetHitboxExtent(EHitboxType HitboxType);
 
 	void DrawSavedPositions(const TArray<FSavedPosition> SavedPositions);
-
+	
+	// FSavedPosition GetPrecisePosition(float);
 private:
 	TArray<FSavedHitbox> BuildSavedHitboxArr();
 
+	// need to get the hitboxes to check them! ._.
 	TArray<FSavedPosition> SavedPositions;
 
 	///@brief Maximum time to hold onto SavedPositions.

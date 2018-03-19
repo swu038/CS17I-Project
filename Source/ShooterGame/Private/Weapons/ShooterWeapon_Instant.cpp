@@ -4,17 +4,7 @@
 #include "Weapons/ShooterWeapon_Instant.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Effects/ShooterImpactEffect.h"
-#include "UI/ShooterHUD.h"
-#include "SShooterScoreboardWidget.h"
-#include "SChatWidget.h"
-#include "Engine/ViewportSplitScreen.h"
-#include "ShooterWeapon.h"
-#include "ShooterDamageType.h"
-#include "Online/ShooterPlayerState.h"
-#include "Misc/NetworkVersion.h"
-#include "GameFramework/Actor.h"
-#include "GameFramework/PlayerController.h"
-#include "Runtime/Engine/Classes/GameFramework/HUD.h"
+
 AShooterWeapon_Instant::AShooterWeapon_Instant(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	CurrentFiringSpread = 0.0f;
@@ -23,6 +13,7 @@ AShooterWeapon_Instant::AShooterWeapon_Instant(const FObjectInitializer& ObjectI
 //////////////////////////////////////////////////////////////////////////
 // Weapon usage
 
+// Can I line trace here?
 void AShooterWeapon_Instant::FireWeapon()
 {
 	const int32 RandomSeed = FMath::Rand();
@@ -35,6 +26,10 @@ void AShooterWeapon_Instant::FireWeapon()
 	const FVector ShootDir = WeaponRandomStream.VRandCone(AimDir, ConeHalfAngle, ConeHalfAngle);
 	const FVector EndTrace = StartTrace + ShootDir * InstantConfig.WeaponRange;
 
+	// DrawDebugLine(GetWorld(), StartTrace, EndTrace, FColor::Red, false, 10.0f, 0, 1.0f);
+	
+	
+	
 	const FHitResult Impact = WeaponTrace(StartTrace, EndTrace);
 	ProcessInstantHit(Impact, StartTrace, ShootDir, RandomSeed, CurrentSpread);
 
@@ -43,7 +38,6 @@ void AShooterWeapon_Instant::FireWeapon()
 
 bool AShooterWeapon_Instant::ServerNotifyHit_Validate(const FHitResult& Impact, FVector_NetQuantizeNormal ShootDir, int32 RandomSeed, float ReticleSpread)
 {
-	//UE_LOG(LogTemp, Display, TEXT("Hit"));
 	return true;
 }
 
@@ -64,19 +58,17 @@ void AShooterWeapon_Instant::ServerNotifyHit_Implementation(const FHitResult& Im
 		{
 			if (CurrentState != EWeaponState::Idle)
 			{
-				if (Impact.GetActor() == NULL) //Did not hit a player
+				if (Impact.GetActor() == NULL)
 				{
-					if (Impact.bBlockingHit) //But it did hit an actor object
+					if (Impact.bBlockingHit)
 					{
-						UE_LOG(LogTemp, Display, TEXT("Hit Non Player"));
 						ProcessInstantHit_Confirmed(Impact, Origin, ShootDir, RandomSeed, ReticleSpread);
 					}
 				}
-				// assume it told the truth about static things because they don't move and the hit 
+				// assume it told the truth about static things because the don't move and the hit 
 				// usually doesn't have significant gameplay implications
 				else if (Impact.GetActor()->IsRootComponentStatic() || Impact.GetActor()->IsRootComponentStationary())
 				{
-					UE_LOG(LogTemp, Display, TEXT("Hit Static Object"));
 					ProcessInstantHit_Confirmed(Impact, Origin, ShootDir, RandomSeed, ReticleSpread);
 				}
 				else
@@ -143,8 +135,6 @@ void AShooterWeapon_Instant::ServerNotifyHit_Implementation(const FHitResult& Im
 
 					UE_LOG(LogTemp, Display, TEXT("Process Instant Hit"));
 					ProcessInstantHit_Confirmed(Impact, Origin, ShootDir, RandomSeed, ReticleSpread);
-
-					
 				}
 			}
 			else if (ViewDotHitDir <= InstantConfig.AllowedViewDotHitDir)
@@ -160,7 +150,6 @@ void AShooterWeapon_Instant::ServerNotifyHit_Implementation(const FHitResult& Im
 }
 bool AShooterWeapon_Instant::ServerNotifyMiss_Validate(FVector_NetQuantizeNormal ShootDir, int32 RandomSeed, float ReticleSpread)
 {
-	UE_LOG(LogTemp, Display, TEXT("Miss"));
 	return true;
 }
 
@@ -261,13 +250,23 @@ void AShooterWeapon_Instant::ProcessInstantHit(const FHitResult& Impact, const F
 
 void AShooterWeapon_Instant::ProcessInstantHit_Confirmed(const FHitResult& Impact, const FVector& Origin, const FVector& ShootDir, int32 RandomSeed, float ReticleSpread)
 {
-	// handle damage
-	
-	UE_LOG(LogTemp, Display, TEXT("Confirmed Hit"));
-	UE_LOG(LogTemp, Display, TEXT("%s"), *GetNameSafe(Impact.GetActor()));
-	if (ShouldDealDamage(Impact.GetActor())) //If the actor is a player. Deal Damage
+	/*
+	FHitResult HitData = Impact;
+	FCollisionQueryParams TraceParams = FCollisionQueryParams(FName(TEXT("TRACE")), true, this);
+	TraceParams.bTraceComplex = true;
+	if (GetWorld()->LineTraceSingleByChannel(HitData, Origin, ShootDir, ECC_GameTraceChannel4, TraceParams))
 	{
-		UE_LOG(LogTemp, Display, TEXT("Deadly Hit"));
+		DrawDebugLine(GetWorld(), HitData.TraceStart, HitData.TraceEnd, FColor::Red, false, 10.0f, 0, 1.0f);
+		UE_LOG(LogTemp, Warning, TEXT("Hit hitbox"));
+	}
+	else
+		UE_LOG(LogTemp, Warning, TEXT("did not hit hitbox"));
+	
+	*/
+	
+	// handle damage
+	if (ShouldDealDamage(Impact.GetActor()))
+	{
 		DealDamage(Impact, ShootDir);
 	}
 
@@ -293,7 +292,7 @@ void AShooterWeapon_Instant::ProcessInstantHit_Confirmed(const FHitResult& Impac
 bool AShooterWeapon_Instant::ShouldDealDamage(AActor* TestActor) const
 {
 	// if we're an actor on the server, or the actor's role is authoritative, we should register damage
-	if (TestActor) //If the actor is a player
+	if (TestActor)
 	{
 		UE_LOG(LogTemp, Display, TEXT("%s"), *GetNameSafe(TestActor));
 		if (GetNetMode() != NM_Client ||
@@ -415,4 +414,10 @@ void AShooterWeapon_Instant::GetLifetimeReplicatedProps( TArray< FLifetimeProper
 	Super::GetLifetimeReplicatedProps( OutLifetimeProps );
 
 	DOREPLIFETIME_CONDITION( AShooterWeapon_Instant, HitNotify, COND_SkipOwner );
+}
+
+void AShooterWeapon_Instant::getPrediction() 
+{
+	UE_LOG(LogTemp, Warning, TEXT("Entered getPrediction, trying to get ping"));
+	// AShooterPlayerController* MyPC = GetWorld()->GetFirstPlayerController();
 }
