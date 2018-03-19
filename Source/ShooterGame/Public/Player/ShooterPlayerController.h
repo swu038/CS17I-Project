@@ -14,6 +14,7 @@ class AShooterPlayerController : public APlayerController
 	GENERATED_UCLASS_BODY()
 
 public:
+
 	// lag comp code
 	virtual void PlayerTick(float DeltaTime) override;
 
@@ -63,7 +64,6 @@ public:
 	///@brief Returns amount of time, in seconds, to tick to make up
 	///       for network lag.
 	virtual float GetPredictionTime();
-
 
 	void InitPlayerState();
 

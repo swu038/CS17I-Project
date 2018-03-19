@@ -94,7 +94,8 @@ protected:
 	{
 		return EAmmoType::EBullet;
 	}
-
+	UPROPERTY()
+		TArray<uint8> pingrecord;
 	/** weapon config */
 	UPROPERTY(EditDefaultsOnly, Category=Config)
 	FInstantWeaponData InstantConfig;
@@ -117,11 +118,14 @@ protected:
 
 	/** current spread from continuous firing */
 	float CurrentFiringSpread;
-
+	float timeElapsed;
+	uint8 lastPing;
 	//////////////////////////////////////////////////////////////////////////
 	// Weapon usage
-
+	UFUNCTION()
+	uint8 CalcAveragePing(float timestamp);
 	/** server notified of hit from client to verify */
+
 	UFUNCTION(reliable, server, WithValidation)
 	void ServerNotifyHit(const FHitResult& Impact, FVector_NetQuantizeNormal ShootDir, int32 RandomSeed, float ReticleSpread);
 

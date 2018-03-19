@@ -76,8 +76,7 @@ AShooterCharacter::AShooterCharacter(const FObjectInitializer& ObjectInitializer
 
 // Begin lag compensation code
 void AShooterCharacter::GenerateHitboxes() {
-	USkeletalMeshComponent* PlayerMesh = GetMesh();
-	
+	USkeletalMeshComponent* PlayerMesh = GetMesh();	
 	
 	// HB_Head
 	HB_Head = CreateDefaultSubobject<UBoxComponent>(TEXT("HB_Head"));
@@ -91,8 +90,7 @@ void AShooterCharacter::GenerateHitboxes() {
 	HB_Head->SetCollisionProfileName("Hitbox");
 	HB_Head->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	HB_Head->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-
-	
+  
 	// HB_UpperTorso
 	HB_UpperTorso = CreateDefaultSubobject<UBoxComponent>(TEXT("HB_UpperTorso"));
 	HB_UpperTorso->SetupAttachment(PlayerMesh, FName(TEXT("b_Spine1")));
@@ -105,7 +103,6 @@ void AShooterCharacter::GenerateHitboxes() {
 	HB_UpperTorso->SetCollisionProfileName("Hitbox");
 	HB_UpperTorso->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	HB_UpperTorso->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-
 	
 	// HB_LowerTorso
 	HB_LowerTorso = CreateDefaultSubobject<UBoxComponent>(TEXT("HB_LowerTorso"));
@@ -119,7 +116,6 @@ void AShooterCharacter::GenerateHitboxes() {
 	HB_LowerTorso->SetCollisionProfileName("Hitbox");
 	HB_LowerTorso->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	HB_LowerTorso->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-
 	
 	// HB_LowerLeftLeg
 	HB_LowerLeftLeg = CreateDefaultSubobject<UBoxComponent>(TEXT("HB_LowerLeftLeg"));
@@ -127,7 +123,7 @@ void AShooterCharacter::GenerateHitboxes() {
 	HB_LowerLeftLeg->SetRelativeLocation(FVector(16.0f, 0.0f, 0.0f));
 	HB_LowerLeftLeg->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 	HB_LowerLeftLeg->SetWorldScale3D(FVector(0.78125f, 0.5f, 0.3125f));
-	
+  
 	// COLLISION_HITBOX is a custom collision channel
 	HB_LowerLeftLeg->SetCollisionObjectType(COLLISION_HITBOX);
 	HB_LowerLeftLeg->SetCollisionProfileName("Hitbox");
@@ -304,7 +300,6 @@ void AShooterCharacter::PositionUpdated() {
 	if (SavedPositions.Num() >= 2 && SavedPositions[1].Time < WorldTime - MaxSavedPositionAge) {
 		SavedPositions.RemoveAt(0);
 	}
-
 }
 
 TArray<FSavedHitbox> AShooterCharacter::BuildSavedHitboxArr() {
@@ -451,16 +446,13 @@ UBoxComponent* AShooterCharacter::GetHitbox(EHitboxType HitboxType) {
 
 	switch (HitboxType) {
 
-	
 	case EHitboxType::Head:
 		Hitbox = HB_Head;
 		break;
 
-	
 	case EHitboxType::UpperTorso:
 		Hitbox = HB_UpperTorso;
 		break;
-
 	
 	case EHitboxType::LowerTorso:
 		Hitbox = HB_LowerTorso;
@@ -521,7 +513,7 @@ UBoxComponent* AShooterCharacter::GetHitbox(EHitboxType HitboxType) {
 	case EHitboxType::UpperRightArm:
 		Hitbox = HB_UpperRightArm;
 		break;
-		
+
 	default:
 		break;
 	}
@@ -551,6 +543,8 @@ void AShooterCharacter::DrawSavedPositions(const TArray<FSavedPosition> SavedPos
 	const float BoxThickness = 0.75f;
 	const bool PersistentLines = true;
 
+	//UE_LOG(LogTemp, Display, TEXT("Drawing Hitboxes"));
+  
 	for (FSavedPosition SavedPosition : SavedPositions) {
 		for (FSavedHitbox SavedHitbox : SavedPosition.Hitboxes) {
 			DrawDebugBox(

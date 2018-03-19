@@ -501,13 +501,13 @@ void AShooterWeapon::ServerHandleFiring_Implementation()
 
 	HandleFiring();
 	ServerConfirmTime = GetWorld()->GetTimeSeconds() - ShootStartTime;
+
 	/*
 	if (GEngine) {
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("ServerHandleFiring_Implementation"));
 	}
-		
 	*/
-
+  
 	if (bShouldUpdateAmmo)
 	{
 		// update ammo

@@ -222,6 +222,7 @@ void AShooterPlayerState::CalculatePing(float NewPing) {
 
 	float OldPing = ExactPing;
 	Super::UpdatePing(NewPing);
+
 	AShooterPlayerController* PC = Cast<AShooterPlayerController>(GetOwner());
 	if (!PC) {
 		return;
