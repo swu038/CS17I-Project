@@ -569,10 +569,12 @@ void AShooterCharacter::DrawSavedPositions(const TArray<FSavedPosition> SavedPos
 
 }
 
-TArray<FSavedPosition> AShooterCharacter::GetSavedPositions(const TArray<FSavedPosition> SavedPositions) {
+/*
+FSavedPosition AShooterCharacter::GetPrecisePosition(float Time) {
 	
-	return SavedPositions;
+	return this->SavedPositions;
 }
+*/
 
 // End lag compensation code
 
@@ -1611,7 +1613,10 @@ void AShooterCharacter::Tick(float DeltaSeconds)
 		}
 	}
 
-	if (HasAuthority()) {
+	// if server and you're drawing other people's hitboxes
+	// can't have both server and client showing hitboxes at the same time. Otherwise you short circuit
+	// and crash everything at runtime.
+	if (HasAuthority() && !bLocallyControlled) {
 		DrawSavedPositions(SavedPositions);
 	}
 }

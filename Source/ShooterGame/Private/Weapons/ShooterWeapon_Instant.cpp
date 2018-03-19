@@ -13,6 +13,7 @@ AShooterWeapon_Instant::AShooterWeapon_Instant(const FObjectInitializer& ObjectI
 //////////////////////////////////////////////////////////////////////////
 // Weapon usage
 
+// Can I line trace here?
 void AShooterWeapon_Instant::FireWeapon()
 {
 	const int32 RandomSeed = FMath::Rand();
@@ -25,6 +26,10 @@ void AShooterWeapon_Instant::FireWeapon()
 	const FVector ShootDir = WeaponRandomStream.VRandCone(AimDir, ConeHalfAngle, ConeHalfAngle);
 	const FVector EndTrace = StartTrace + ShootDir * InstantConfig.WeaponRange;
 
+	// DrawDebugLine(GetWorld(), StartTrace, EndTrace, FColor::Red, false, 10.0f, 0, 1.0f);
+	
+	
+	
 	const FHitResult Impact = WeaponTrace(StartTrace, EndTrace);
 	ProcessInstantHit(Impact, StartTrace, ShootDir, RandomSeed, CurrentSpread);
 
@@ -161,6 +166,20 @@ void AShooterWeapon_Instant::ProcessInstantHit(const FHitResult& Impact, const F
 
 void AShooterWeapon_Instant::ProcessInstantHit_Confirmed(const FHitResult& Impact, const FVector& Origin, const FVector& ShootDir, int32 RandomSeed, float ReticleSpread)
 {
+	/*
+	FHitResult HitData = Impact;
+	FCollisionQueryParams TraceParams = FCollisionQueryParams(FName(TEXT("TRACE")), true, this);
+	TraceParams.bTraceComplex = true;
+	if (GetWorld()->LineTraceSingleByChannel(HitData, Origin, ShootDir, ECC_GameTraceChannel4, TraceParams))
+	{
+		DrawDebugLine(GetWorld(), HitData.TraceStart, HitData.TraceEnd, FColor::Red, false, 10.0f, 0, 1.0f);
+		UE_LOG(LogTemp, Warning, TEXT("Hit hitbox"));
+	}
+	else
+		UE_LOG(LogTemp, Warning, TEXT("did not hit hitbox"));
+	
+	*/
+	
 	// handle damage
 	if (ShouldDealDamage(Impact.GetActor()))
 	{

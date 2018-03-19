@@ -531,10 +531,11 @@ public:
 
 	void DrawSavedPositions(const TArray<FSavedPosition> SavedPositions);
 	
-	TArray<FSavedPosition> GetSavedPositions(const TArray<FSavedPosition> SavedPositions);
+	// FSavedPosition GetPrecisePosition(float);
 private:
 	TArray<FSavedHitbox> BuildSavedHitboxArr();
 
+	// need to get the hitboxes to check them! ._.
 	TArray<FSavedPosition> SavedPositions;
 
 	///@brief Maximum time to hold onto SavedPositions.
